@@ -1,193 +1,190 @@
-internal class Program
-    {    
-        const char PLAYER_X = 'X';
-        const char PLAYER_O = 'O';
-        static void Board(char[,] board)
+namespace TicTacToeGame
+{
+    internal class Board
+    { 
+        private char[,] board;
+
+        // инициализираме дъската с празни места 
+        public Board()
         {
-            for (int row = 0; row < 3; row++)
+            board = new char[3, 3];
+            for (int i = 0; i < 3; i++)
             {
-                for (int col = 0; col < 3; col++)
+                for (int j = 0; j < 3; j++)
                 {
-                    board[row, col] = ' ';
+                   board[i, j] = ' ';
                 }
             }
         }
-        static void PrintBoard(char[,] board)
+        public bool IsValidMove(int row, int col)
         {
-            Console.WriteLine("    0   1   2  ");
-            for (int row = 0; row < 3; row++)
+            return row >= 0 
+                && row < 3 
+                && col >= 0 
+                && col < 3 
+                && board[row, col] == ' ';
+        }
+        public void MakeMove(int row, int col, char symbol)
+        {
+            board[row, col] = symbol;
+        }
+        public char CheckWinner()
+        {
+            //хоризонтални редове
+            for (int i = 0; i < 3; i++)
             {
-                Console.Write(row + " | ");
-                for (int col = 0; col < 3; col++)
+                if (board[i, 0] != ' '
+                    && board[i, 0] == board[i, 1]
+                    && board[i, 1] == board[i, 2])
                 {
-                    Console.Write(board[row, col]);
-                    Console.Write(" | ");
+                    return board[i, 0];
                 }
+                    
+            }
+            // вертикални колони
+            for (int j = 0; j < 3; j++)
+            {
+                if (board[0, j] != ' '
+                    && board[0, j] == board[1, j]
+                    && board[1, j] == board[2, j])
+                {
+                    return board[0, j];
+                }
+            }
+            //диагонали
+            if (board[0, 0] != ' '
+                && board[0, 0] == board[1, 1]
+                && board[1, 1] == board[2, 2])
+            { 
+                return board[0, 0];
+            }
 
+            if (board[0, 2] != ' '
+                && board[0, 2] == board[1, 1]
+                && board[1, 1] == board[2, 0])
+            {
+                return board[0, 2]; 
+            }
+            return ' ';
+        }
+        public bool IsFullBoard()
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    if (board[i, j] == ' ')
+                   return false;
+                }
+            }
+            return true;
+        }
+        public void PrintBoard()
+        {
+            Console.WriteLine("  0 1 2");
+            for (int i = 0; i < 3; i++)
+            {
+                Console.Write(i + " ");
+                for (int j = 0; j < 3; j++)
+                {
+                    Console.Write(board[i, j]);
+                    if (j < 2)
+                        Console.Write("|");
+                }
                 Console.WriteLine();
+                if (i < 2)
+                    Console.WriteLine("  -----");
             }
         }
-        static char GettingValuesFromPlayer(char[,] board, char player)
+    }
+internal class Player
+    {
+        private char symbol;
+        public Player(char symbol)
         {
-            int row;
-            int col;
+            this.symbol = symbol;
+        }
 
+        // връща символа на играча
+        public char GetSymbol()
+        {
+            return symbol;
+        }
+        public void MakeMove(Board board)
+        {
+            // четем координати от конзолата, докато не въведе валидни
+            int row, col;
             do
             {
-                Console.Write("Please enter row: ");
+                Console.WriteLine("Player {0}, enter row and column:", symbol);
                 row = int.Parse(Console.ReadLine());
-
-                if (row < 0 || row > 2)
-                {
-                    Console.WriteLine("Not in range.");
-                    Console.Write("Please enter row: ");
-                    row = int.Parse(Console.ReadLine());
-                }
-            }
-            while (row < 0 || row > 2);
-
-            do
-            {
-                Console.Write("Please enter col: ");
                 col = int.Parse(Console.ReadLine());
-
-                if (col < 0 || col > 2)
-                {
-                    Console.WriteLine("Not in range.");
-                    Console.Write("Please enter col: ");
-                    col = int.Parse(Console.ReadLine());
-                }
             }
-            while (col < 0 || col > 2);
+            while (!board.IsValidMove(row, col));
 
-            while (board[row, col] == PLAYER_X || board[row, col] == PLAYER_O)
+            // Поставя символа на играча на дъската
+            board.MakeMove(row, col, symbol);
+        }
+    }
+internal class Game
+    {
+        private Board board;
+        private Player playerX, playerO;
+        public Game()
+        {
+            board = new Board();
+            playerX = new Player('X');
+            playerO = new Player('O');
+        }
+        public void StartTheGame()
+        {
+            Player currentPlayer = playerX;
+
+            while (true)
             {
-                Console.WriteLine("Not a valid turn:");
+                board.PrintBoard();
 
-                GettingValuesFromPlayer(board, player);
+                // ход на играча
+                currentPlayer.MakeMove(board);
 
-                if (player == PLAYER_X)
+                char winner = board.CheckWinner();
+
+                //има победител, извежда го и прекратява играта
+                if (winner != ' ')
                 {
-                    return PLAYER_O;
+                    Console.WriteLine("Player {0} wins!", winner);
+                    break;
                 }
+
+                // дали дъската е пълна
+                if (board.IsFullBoard())
+                { 
+                    Console.WriteLine("It's a tie!");
+                    break;
+                }
+
+                // сменяме текущия играч
+                if (currentPlayer == playerX)
+                {
+                    currentPlayer = playerO;
+                }
+
                 else
-                    return PLAYER_X;
+                {
+                   currentPlayer = playerX;
+                }
             }
-            
-            board[row, col] = player;
-            return board[row, col];
-        }
-        static bool CheckForWin(bool endGame,char [,] board, char player)
-        {
-            if (board[0, 0] == player 
-                && board[0, 1] == player
-                && board[0, 2] == player)
-            {
-                Console.WriteLine("Player " + player + " wins");
-                endGame = true;
-                return endGame;
-            }
-            else if (board[1, 0] == player  
-                && board[1, 1] == player     
-                && board[1, 2] == player)
-            {
-                Console.WriteLine("Player " + player + " wins");
-                endGame = true;
-                return endGame;
-            }
-            else if (board[2, 0] == player  
-                && board[2, 1] == player
-                && board[2, 2] == player)
-            {
-                Console.WriteLine("Player " + player + " wins");
-                endGame = true;
-                return endGame;
-            }
-            else if (board[0, 0] == player
-                && board[1, 0] == player 
-                && board[2, 0] == player)
-            {
-                Console.WriteLine("Player " + player + " wins");
-                endGame = true;
-                return endGame;
-            }
-            else if (board[0, 1] == player 
-                && board[1, 1] == player 
-                && board[2, 1] == player)
-            {
-                Console.WriteLine("Player " + player + " wins");
-                endGame = true;
-                return endGame;
-            }
-            else if (board[0, 2] == player 
-                && board[1, 2] == player 
-                && board[2, 2] == player)
-            {
-                Console.WriteLine("Player " + player + " wins");
-                endGame = true;
-                return endGame;
-            }
-            else if (board[0, 0] == player 
-                && board[1, 1] == player 
-                && board[2, 2] == player)
-            {
-                Console.WriteLine("Player " + player + " wins");
-                endGame = true;
-                return endGame;
-            }
-            else if (board[0, 2] == player 
-                && board[1, 1] == player 
-                && board[2, 0] == player)
-            {
-                Console.WriteLine("Player " + player + " wins");
-                endGame = true;
-                return endGame;
-            }
-            return endGame;
-        } 
-        static char SwitchPlayer(char currentPlayer)
-        {
-            if (currentPlayer == PLAYER_X)
-            {
-                return PLAYER_O;
-            }
-            else
-                return PLAYER_X;
-        }
 
+            // Извежда крайното състояние на дъската
+            board.PrintBoard();
+        }
+    }
+  internal class Program
+    {
         static void Main(string[] args)
         {
-            
-            bool endGame = false;
-            int movesPlayed = 0;
-            char player = PLAYER_X;
-            char[,] board = new char[3,3];
-
-            Board(board);
-
-            do
-            {
-                Console.Clear();
-                PrintBoard(board);
-
-                Console.WriteLine("Player " + player + " it's your turn");
-
-                GettingValuesFromPlayer(board, player);
-
-                PrintBoard(board);
-
-                endGame = CheckForWin(endGame, board, player);
-
-                movesPlayed += 1;
-
-                player = SwitchPlayer(player);
-            }
-            while (endGame == false || movesPlayed == 9);
-
-            if (movesPlayed == 9) 
-            {
-                Console.WriteLine("DRAW");
-            }
+            Game game = new Game();
+            game.StartTheGame();
         }
-        
     }
+}
