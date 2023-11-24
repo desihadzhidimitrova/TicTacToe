@@ -1,1 +1,193 @@
+internal class Program
+    {    
+        const char PLAYER_X = 'X';
+        const char PLAYER_O = 'O';
+        static void Board(char[,] board)
+        {
+            for (int row = 0; row < 3; row++)
+            {
+                for (int col = 0; col < 3; col++)
+                {
+                    board[row, col] = ' ';
+                }
+            }
+        }
+        static void PrintBoard(char[,] board)
+        {
+            Console.WriteLine("    0   1   2  ");
+            for (int row = 0; row < 3; row++)
+            {
+                Console.Write(row + " | ");
+                for (int col = 0; col < 3; col++)
+                {
+                    Console.Write(board[row, col]);
+                    Console.Write(" | ");
+                }
 
+                Console.WriteLine();
+            }
+        }
+        static char GettingValuesFromPlayer(char[,] board, char player)
+        {
+            int row;
+            int col;
+
+            do
+            {
+                Console.Write("Please enter row: ");
+                row = int.Parse(Console.ReadLine());
+
+                if (row < 0 || row > 2)
+                {
+                    Console.WriteLine("Not in range.");
+                    Console.Write("Please enter row: ");
+                    row = int.Parse(Console.ReadLine());
+                }
+            }
+            while (row < 0 || row > 2);
+
+            do
+            {
+                Console.Write("Please enter col: ");
+                col = int.Parse(Console.ReadLine());
+
+                if (col < 0 || col > 2)
+                {
+                    Console.WriteLine("Not in range.");
+                    Console.Write("Please enter col: ");
+                    col = int.Parse(Console.ReadLine());
+                }
+            }
+            while (col < 0 || col > 2);
+
+            while (board[row, col] == PLAYER_X || board[row, col] == PLAYER_O)
+            {
+                Console.WriteLine("Not a valid turn:");
+
+                GettingValuesFromPlayer(board, player);
+
+                if (player == PLAYER_X)
+                {
+                    return PLAYER_O;
+                }
+                else
+                    return PLAYER_X;
+            }
+            
+            board[row, col] = player;
+            return board[row, col];
+        }
+        static bool CheckForWin(bool endGame,char [,] board, char player)
+        {
+            if (board[0, 0] == player 
+                && board[0, 1] == player
+                && board[0, 2] == player)
+            {
+                Console.WriteLine("Player " + player + " wins");
+                endGame = true;
+                return endGame;
+            }
+            else if (board[1, 0] == player  
+                && board[1, 1] == player     
+                && board[1, 2] == player)
+            {
+                Console.WriteLine("Player " + player + " wins");
+                endGame = true;
+                return endGame;
+            }
+            else if (board[2, 0] == player  
+                && board[2, 1] == player
+                && board[2, 2] == player)
+            {
+                Console.WriteLine("Player " + player + " wins");
+                endGame = true;
+                return endGame;
+            }
+            else if (board[0, 0] == player
+                && board[1, 0] == player 
+                && board[2, 0] == player)
+            {
+                Console.WriteLine("Player " + player + " wins");
+                endGame = true;
+                return endGame;
+            }
+            else if (board[0, 1] == player 
+                && board[1, 1] == player 
+                && board[2, 1] == player)
+            {
+                Console.WriteLine("Player " + player + " wins");
+                endGame = true;
+                return endGame;
+            }
+            else if (board[0, 2] == player 
+                && board[1, 2] == player 
+                && board[2, 2] == player)
+            {
+                Console.WriteLine("Player " + player + " wins");
+                endGame = true;
+                return endGame;
+            }
+            else if (board[0, 0] == player 
+                && board[1, 1] == player 
+                && board[2, 2] == player)
+            {
+                Console.WriteLine("Player " + player + " wins");
+                endGame = true;
+                return endGame;
+            }
+            else if (board[0, 2] == player 
+                && board[1, 1] == player 
+                && board[2, 0] == player)
+            {
+                Console.WriteLine("Player " + player + " wins");
+                endGame = true;
+                return endGame;
+            }
+            return endGame;
+        } 
+        static char SwitchPlayer(char currentPlayer)
+        {
+            if (currentPlayer == PLAYER_X)
+            {
+                return PLAYER_O;
+            }
+            else
+                return PLAYER_X;
+        }
+
+        static void Main(string[] args)
+        {
+            
+            bool endGame = false;
+            int movesPlayed = 0;
+            char player = PLAYER_X;
+            char[,] board = new char[3,3];
+
+            Board(board);
+
+            do
+            {
+                Console.Clear();
+                PrintBoard(board);
+
+                Console.WriteLine("Player " + player + " it's your turn");
+
+                GettingValuesFromPlayer(board, player);
+
+                PrintBoard(board);
+
+                endGame = CheckForWin(endGame, board, player);
+
+                movesPlayed += 1;
+
+                player = SwitchPlayer(player);
+            }
+            while (endGame == false || movesPlayed == 9);
+
+            if (movesPlayed == 9) 
+            {
+                Console.WriteLine("DRAW");
+            }
+        }
+        
+    }
